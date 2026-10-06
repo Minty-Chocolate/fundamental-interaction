@@ -1,0 +1,6 @@
+.env
+.git
+.ipynb_checkpoints
+__pycache__/
+data/
+notebooks/.ipynb_checkpoints/
