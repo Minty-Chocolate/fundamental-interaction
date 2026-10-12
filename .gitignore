@@ -1,17 +1,25 @@
-# Local configuration
+# Local configuration and secrets
 .env
+.env.*
+!.env.example
 
-# Vendor data, generated result caches, and temporary spill files
+# Licensed vendor data, generated caches, and temporary spill files
 data/
 .cache/
 .tmp/
 .Trash-0/
 cache/
+*.partial.parquet
+*.partial.csv
 
-# Python and Jupyter state
+# Python, test, and notebook state
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.coverage
+coverage/
+.mypy_cache/
+.ruff_cache/
 .ipynb_checkpoints/
 
 # OS/editor state

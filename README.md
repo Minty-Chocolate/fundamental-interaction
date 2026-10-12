@@ -5,6 +5,11 @@ A daily, point-in-time research workflow for the eleven published signals from
 Pricing*. It uses local CRSP daily returns, Compustat North America Annual, and
 the time-valid CCM link history through `us_equities_datahandler`.
 
+> **Data availability.** The repository contains code, notebooks, tests, and
+> presentation figures only. CRSP, Compustat, and CCM are licensed WRDS/vendor
+> datasets and are deliberately excluded. Point the data-handler configuration
+> at a locally licensed copy before running the pipeline.
+
 The active implementation is `us_equities_signal_research`. The former
 `daily_signal_backtest` runtime lives under [`retired/legacy_runtime`](retired/legacy_runtime)
 and is not imported or executed.
@@ -61,3 +66,17 @@ Open Jupyter Lab with `docker compose up -d`, then use
 to run or inspect the complete grid. The grid parameters are ordinary Python
 lists, so the report can overlay any Cartesian product of frequency, weight
 method, and SIC treatment for all eleven signals.
+
+## Repository layout
+
+```text
+src/us_equities_signal_research/  PIT signal recipes, scoring, and backtests
+notebooks/                        reproducible research report
+tests/                            timing, formula, and portfolio tests
+assets/                           committed figures shown above
+retired/legacy_runtime/           archived pre-PIT implementation
+```
+
+Generated data, result caches, notebook checkpoints, and local configuration
+are excluded by `.gitignore`. This keeps the repository portable while the
+large licensed inputs and derived panels remain local.
