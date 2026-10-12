@@ -74,7 +74,7 @@ src/us_equities_signal_research/  PIT signal recipes, scoring, and backtests
 notebooks/                        reproducible research report
 tests/                            timing, formula, and portfolio tests
 assets/                           committed figures shown above
-retired/legacy_runtime/           archived pre-PIT implementation
+retired/legacy_runtime/           frozen provenance archive; never execute
 ```
 
 Generated data, result caches, notebook checkpoints, and local configuration
