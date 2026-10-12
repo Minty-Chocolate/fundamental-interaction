@@ -40,6 +40,7 @@ def main() -> None:
     parser.add_argument("--methods", default=",".join(WEIGHT_METHODS))
     parser.add_argument("--sic-levels", default="global,1")
     parser.add_argument("--refresh-raw", action="store_true")
+    parser.add_argument("--refresh-results", action="store_true", help="Rebuild a matching completed result grid.")
     parser.add_argument("--crsp-root", default="/datahandler/data/derived/crsp_ranked_daily")
     parser.add_argument("--annual", default="/datahandler/data/derived/compustat/annual.parquet")
     parser.add_argument("--ccm", default="/datahandler/data/derived/ccm/links.parquet")
@@ -68,6 +69,7 @@ def main() -> None:
             methods=_csv(args.methods),
             sic_levels=_sic_csv(args.sic_levels),
             refresh_raw=args.refresh_raw,
+            refresh_results=args.refresh_results,
         )
         print(f"top {rank:,}: wrote {len(daily):,} daily rows and {len(metrics):,} metric rows to {output}")
 

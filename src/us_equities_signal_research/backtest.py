@@ -24,6 +24,54 @@ WEIGHT_METHODS = ("zscore", "rank", "quintile")
 SIC_LEVELS = (None, 1)
 
 
+def _load_result_cache(
+    output: Path,
+    *,
+    universe: object,
+    names: tuple[str, ...],
+    frequencies: tuple[str, ...],
+    methods: tuple[str, ...],
+    sic_levels: tuple[int | None, ...],
+) -> tuple[pd.DataFrame, pd.DataFrame] | None:
+    """Load a completed result grid only when its declared settings match."""
+    daily_path = output / "daily_ls_returns.parquet"
+    metrics_path = output / "performance_metrics.csv"
+    manifest_path = output / "manifest.json"
+    if not all(path.is_file() for path in (daily_path, metrics_path, manifest_path)):
+        return None
+    try:
+        manifest = json.loads(manifest_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    expected = {
+        "signals": list(names),
+        "frequencies": list(frequencies),
+        "weight_methods": list(methods),
+        "sic_levels": list(sic_levels),
+        "return_definition": "DlyRet minus equal-weight mean DlyRet among non-null raw-signal securities each day",
+        "signal_to_return_sessions": 2,
+    }
+    if any(manifest.get(key) != value for key, value in expected.items()):
+        return None
+    cached_universe = manifest.get("universe", {})
+    for field in ("start", "end"):
+        requested = getattr(universe, field, None)
+        if requested is not None and cached_universe.get(field) != str(requested):
+            return None
+    requested_universe = {
+        field: value
+        for field in ("rank_lte", "quantile_lte", "cumpct_lte", "lag")
+        if (value := getattr(universe, field, None)) is not None
+    }
+    cached_request = manifest.get("requested_universe")
+    if cached_request is not None and cached_request != requested_universe:
+        return None
+    try:
+        return pd.read_parquet(daily_path), pd.read_csv(metrics_path)
+    except (OSError, ValueError):
+        return None
+
+
 def _formation_mask(index: pd.DatetimeIndex, frequency: str) -> np.ndarray:
     if frequency == "daily":
         return np.ones(len(index), dtype=bool)
@@ -94,11 +142,15 @@ def run(
     methods: Iterable[str] = WEIGHT_METHODS,
     sic_levels: Iterable[int | None] = SIC_LEVELS,
     refresh_raw: bool = False,
+    refresh_results: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run all selected formula × portfolio-setting combinations once.
+    """Return the selected formula × portfolio-setting result grid.
 
     Raw formula panels and CRSP panels are cached separately; grid expansion
     only performs in-memory daily matrix operations, never scans raw vendors.
+    A complete matching result grid is cached too, so a repeat call only reads
+    the daily-return and metric files. Set ``refresh_results`` to rebuild that
+    grid, or ``refresh_raw`` to rebuild both source panels and results.
     """
     selected_names = tuple(signal_names() if names is None else names)
     selected_frequencies, selected_methods, selected_sic = tuple(frequencies), tuple(methods), tuple(sic_levels)
@@ -107,6 +159,18 @@ def run(
     unknown_sic = set(selected_sic).difference(SIC_LEVELS)
     if unknown_frequency or unknown_method or unknown_sic:
         raise ValueError(f"Unsupported grid selection: frequency={unknown_frequency}, method={unknown_method}, sic={unknown_sic}")
+    output = Path(output)
+    if not refresh_raw and not refresh_results:
+        cached_results = _load_result_cache(
+            output,
+            universe=universe,
+            names=selected_names,
+            frequencies=selected_frequencies,
+            methods=selected_methods,
+            sic_levels=selected_sic,
+        )
+        if cached_results is not None:
+            return cached_results
 
     # Materialise all missing raw panels with one Annual-event query, then load
     # and release them one signal at a time.  This keeps the full eleven-signal
@@ -154,7 +218,6 @@ def run(
 
     daily = pd.concat(daily_parts, ignore_index=True)
     metrics = pd.concat(metric_parts, ignore_index=True)
-    output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     daily.to_parquet(output / "daily_ls_returns.parquet", index=False)
     metrics.to_csv(output / "performance_metrics.csv", index=False)
@@ -166,6 +229,11 @@ def run(
         "universe": {
             "start": str(resolved.start), "end": str(resolved.end),
             "state_start": str(resolved.state_start), "coverage_permnos": len(resolved.coverage_permnos),
+        },
+        "requested_universe": {
+            field: value
+            for field in ("rank_lte", "quantile_lte", "cumpct_lte", "lag")
+            if (value := getattr(universe, field, None)) is not None
         },
         "return_definition": "DlyRet minus equal-weight mean DlyRet among non-null raw-signal securities each day",
         "signal_to_return_sessions": 2,
