@@ -115,7 +115,7 @@ def panel(
 ) -> RawSignalPanel:
     """Load one raw daily ``date × permno`` signal panel from its cache."""
     recipe = get_recipe(name)
-    resolved = ensure_panels((name,), data=data, universe=universe, refresh=refresh)
+    resolved = ensure_panels((recipe.name,), data=data, universe=universe, refresh=refresh)
     cached = load_raw(recipe.name, resolved, recipe.version)
     if cached is None:  # defensive: ensure_panels must have produced it
         raise RuntimeError(f"Raw panel materialisation did not produce {recipe.name!r}.")

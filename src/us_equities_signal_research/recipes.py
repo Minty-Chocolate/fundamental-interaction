@@ -15,6 +15,7 @@ import pandas as pd
 import polars as pl
 
 from .model import FundamentalEvents, Recipe
+from .labels import canonical_signal_name
 
 
 @dataclass(frozen=True)
@@ -39,39 +40,39 @@ _FORMULAS: tuple[tuple[str, str], ...] = (
         "SUMRANK(MA(RATIO(oancf, at), 3), WINSOR(SUB(RATIO(TS_SUM(COALESCE(xrd, SUB(at, at)), 5), at), RATIO(COALESCE(intan, SUB(at, at)), at)), 1))",
     ),
     (
-        "PredictableAccrualsSustainedProfit",
+        "predictable_accruals_sustained_profit",
         "MUL(IND_RANK(NEG(WINSOR(VOL(RATIO(DELTA(SUB(wcap, che), 1), at), 5), 1))), IND_RANK(WINSOR(MA(RATIO(SUB(revt, cogs), at), 3), 1)))",
     ),
     (
-        "Funded Research Tilt With Profit Delivery",
+        "funded_research_tilt_with_profit_delivery",
         "MUL(RANK(NEG(RATIO(SUB(DELTA(capx, 1), DELTA(COALESCE(xrd, 0), 1)), MA(sale, 3)))), RANK(GROWTH(SUB(sale, cogs), 1)))",
     ),
     (
-        "WorkingCapitalBloatVsPeers",
+        "working_capital_bloat_vs_peers",
         "SUMRANK(NEG(IND_ZSCORE(RATIO(ADD(SUB(wcap, che), dlc), sale))), IND_ZSCORE(RATIO(SUB(revt, cogs), at)))",
     ),
     (
-        "ConservatismAdjustedProfitLeanClaims",
+        "conservatism_adjusted_profit_lean_claims",
         "MIN(IND_RANK(RATIO(ADD(oiadp, COALESCE(xrd, 0)), at)), IND_RANK(NEG(RATIO(SUB(act, che), sale))))",
     ),
     (
-        "Sustained Coverage With Capped Cushion",
+        "sustained_coverage_with_capped_cushion",
         "WINSOR(MA(RATIO(ADD(SUB(revt, cogs), MIN(ADD(xsga, COALESCE(xrd, 0)), ADD(ADD(xint, txt), dlc))), ADD(ADD(xint, txt), dlc)), 3), 1)",
     ),
     (
-        "Broad Universe Profitable Value Model",
+        "broad_universe_profitable_value_model",
         "SUMRANK(RATIO(ADD(SUB(revt, ADD(cogs, COALESCE(xsga, 0))), COALESCE(xrd, 0)), at), SUMRANK(NEG(RATIO(SUB(ib, COALESCE(oancf, ADD(ib, dp))), at)), SUMRANK(RATIO(ADD(ceq, TS_SUM(COALESCE(xrd, 0), 3)), MUL(prcc_f, csho)), NEG(COALESCE(RATIO(SUB(ADD(dltt, dlc), che), oibdp), RATIO(SUB(ADD(dltt, dlc), che), at))))))",
     ),
     (
-        "NegativeWorkingCapitalProfitSort",
+        "negative_working_capital_profit_sort",
         "MUL(INDICATOR(NEG(wcap), 0), IND_ZSCORE(RATIO(SUB(revt, cogs), at)))",
     ),
     (
-        "TroughCoverageCleanAccrualRollover",
+        "trough_coverage_clean_accrual_rollover",
         "MIN(IND_RANK(TS_MIN(RATIO(SUB(oancf, dp), lt), 5)), MIN(IND_RANK(RATIO(SUB(che, dlc), at)), IND_RANK(NEG(RATIO(SUB(pi, oancf), revt)))))",
     ),
     (
-        "Gross Margin Inventory Efficiency",
+        "gross_margin_inventory_efficiency",
         "MUL(IND_RANK(RATIO(SUB(revt, cogs), sale)), IND_RANK(NEG(RATIO(invt, sale))))",
     ),
 )
@@ -599,6 +600,7 @@ RECIPES: dict[str, Recipe] = {name: _recipe(name, expression) for name, expressi
 
 
 def get_recipe(name: str) -> Recipe:
+    name = canonical_signal_name(name)
     try:
         return RECIPES[name]
     except KeyError as error:

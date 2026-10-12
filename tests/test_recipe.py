@@ -124,8 +124,8 @@ class RecipeTests(unittest.TestCase):
         )
         calendar = pd.date_range("2020-01-02", "2020-01-06", freq="B")
         recipes = (
-            get_recipe("PredictableAccrualsSustainedProfit"),
-            get_recipe("NegativeWorkingCapitalProfitSort"),
+            get_recipe("predictable_accruals_sustained_profit"),
+            get_recipe("negative_working_capital_profit_sort"),
         )
         expected = {recipe.name: recipe.compute(events, calendar) for recipe in recipes}
         actual = compute_recipes(recipes, events, calendar)

@@ -154,7 +154,7 @@ def run(
     the daily-return and metric files. Set ``refresh_results`` to rebuild that
     grid, or ``refresh_raw`` to rebuild both source panels and results.
     """
-    selected_names = tuple(signal_names() if names is None else names)
+    selected_names = tuple(get_recipe(name).name for name in (signal_names() if names is None else names))
     selected_frequencies, selected_methods, selected_sic = tuple(frequencies), tuple(methods), tuple(sic_levels)
     unknown_frequency = set(selected_frequencies).difference(FREQUENCIES)
     unknown_method = set(selected_methods).difference(WEIGHT_METHODS)
