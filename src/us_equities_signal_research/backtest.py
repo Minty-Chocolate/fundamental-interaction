@@ -12,6 +12,7 @@ import pandas as pd
 from .cache import load_score, store_score
 from .execution import DenseReturnEngine
 from .groups import sic_division_panel
+from .labels import canonical_signal_name
 from .market_data import panel as crsp_panel
 from .performance import performance_metrics
 from .pipeline import ensure_panels, panel
@@ -118,14 +119,15 @@ def _records(
     daily_return: pd.Series,
     weights: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    label = canonical_signal_name(signal)
     metric = performance_metrics(daily_return, weights)
-    metric.insert(0, "signal", signal)
+    metric.insert(0, "signal", label)
     metric.insert(1, "rebalance_frequency", frequency)
     metric.insert(2, "weight_method", method)
     metric.insert(3, "sic_level", sic_level)
     daily = pd.DataFrame({"date": daily_return.index, "ls_return": daily_return.to_numpy()})
     daily["cum_return"] = (1.0 + daily["ls_return"].fillna(0.0)).cumprod() - 1.0
-    daily["signal"] = signal
+    daily["signal"] = label
     daily["rebalance_frequency"] = frequency
     daily["weight_method"] = method
     daily["sic_level"] = sic_level
