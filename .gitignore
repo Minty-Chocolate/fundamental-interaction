@@ -1,25 +1,19 @@
-# Local configuration and credentials
+# Local configuration
 .env
-.env.*
-!.env.example
 
-# Licensed input data and generated research outputs
-/data/
-*.parquet
-*.npy
-*.npz
-*.zip
-*.csv
+# Vendor data, generated result caches, and temporary spill files
+data/
+.cache/
+.tmp/
+.Trash-0/
+cache/
 
-# Local caches and working files
-/.tmp/
-/.Trash-0/
-/cache/
+# Python and Jupyter state
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .ipynb_checkpoints/
 
-# OS and editor files
+# OS/editor state
 .DS_Store
 .vscode/

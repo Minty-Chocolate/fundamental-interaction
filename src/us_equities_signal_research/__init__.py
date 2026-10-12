@@ -7,6 +7,9 @@ from .model import RawSignalPanel, Recipe, ScoredPanel
 from .performance import performance_metrics
 from .pipeline import panel
 from .scoring import score
+from .recipes import get_recipe, signal_names
+from .backtest import excess_returns, rebalance_targets, run as run_backtest
+from .pipeline import panels
 
 __all__ = [
     "RawSignalPanel",
@@ -19,4 +22,10 @@ __all__ = [
     "realized_returns",
     "score",
     "sic_division_panel",
+    "get_recipe",
+    "signal_names",
+    "panels",
+    "excess_returns",
+    "rebalance_targets",
+    "run_backtest",
 ]

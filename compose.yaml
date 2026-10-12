@@ -1,13 +1,13 @@
 services:
   research:
-    build:
-      context: .
+    build: .
     ports:
-      - "127.0.0.1:${JUPYTER_PORT:-8888}:8888"
+      - "127.0.0.1:${JUPYTER_PORT:-8892}:8888"
     volumes:
       - .:/workspace
-      - ${RAW_DATA_ROOT:?Set RAW_DATA_ROOT in .env}:/data/raw:ro
-      - /Users/anthropocene/Downloads/TEMP/daily_signal_backtest:/cache
+      - ${DATAHANDLER_ROOT:-/Volumes/T7/Chronicles/Project/US_Equities_DataHandler}:/datahandler:ro
+      - ${CACHE_ROOT:-/Users/anthropocene/Downloads/TEMP/us_equities_signal_research}:/cache
     environment:
-      PYTHONPATH: /workspace/src
+      PYTHONPATH: /workspace/src:/datahandler/src
+      US_EQUITIES_SIGNAL_CACHE: /cache/signal_panels
     working_dir: /workspace

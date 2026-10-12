@@ -17,6 +17,7 @@ class FundamentalEvents:
     annual: pl.DataFrame
     data: object
     coverage_permnos: tuple[int, ...]
+    annual_pandas: pd.DataFrame | None = None
 
 
 class Recipe(Protocol):
