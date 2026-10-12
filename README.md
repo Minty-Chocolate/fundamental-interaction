@@ -10,9 +10,7 @@ the time-valid CCM link history through `us_equities_datahandler`.
 > datasets and are deliberately excluded. Point the data-handler configuration
 > at a locally licensed copy before running the pipeline.
 
-The active implementation is `us_equities_signal_research`. The former
-`daily_signal_backtest` runtime lives under [`retired/legacy_runtime`](retired/legacy_runtime)
-and is not imported or executed.
+The active implementation is `us_equities_signal_research`.
 
 ## What it does
 
@@ -74,7 +72,6 @@ src/us_equities_signal_research/  PIT signal recipes, scoring, and backtests
 notebooks/                        reproducible research report
 tests/                            timing, formula, and portfolio tests
 assets/                           committed figures shown above
-retired/legacy_runtime/           frozen provenance archive; never execute
 ```
 
 Generated data, result caches, notebook checkpoints, and local configuration

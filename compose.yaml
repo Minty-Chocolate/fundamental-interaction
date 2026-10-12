@@ -1,3 +1,5 @@
+name: us_equities_alpha_research
+
 services:
   research:
     build: .
