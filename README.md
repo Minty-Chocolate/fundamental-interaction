@@ -1,9 +1,12 @@
-# US Equities Alpha Research
+# Fundamental Interaction
 
-A daily, point-in-time research workflow for the eleven published signals from
-*Can AI Do Financial Research? LLM-Guided Hypothesis Discovery in Asset
-Pricing*. It uses local CRSP daily returns, Compustat North America Annual, and
-the time-valid CCM link history through `us_equities_datahandler`.
+A daily, point-in-time research workflow for studying how the eleven published
+fundamental signals in *Can AI Do Financial Research? LLM-Guided Hypothesis
+Discovery in Asset Pricing* interact in large-cap U.S. equities. The baseline
+universe is the dynamically reconstituted CRSP Top-500 by lagged market
+capitalization, with Top-1,000 and Top-2,000 sensitivity runs. It uses local
+CRSP daily returns, Compustat North America Annual, and time-valid CCM link
+history through `us_equities_datahandler`.
 
 > **Data availability.** The repository contains code, notebooks, tests, and
 > presentation figures only. CRSP, Compustat, and CCM are licensed WRDS/vendor
@@ -23,7 +26,7 @@ The active implementation is `us_equities_signal_research`.
 - Forms equal-risk long–short portfolios with global 1% winsorization,
   `zscore`, `rank`, or `quintile` weights; optional SIC-division scoring; and
   daily, weekly, or monthly rebalancing.  Raw panels and fully scored daily
-  weights are cached separately on the fast local volume.
+  weights are cached separately in the visible shared DataHandler cache.
 - Uses the strict timing convention: a signal observed after close on `t`
   forms at `t+1` close and earns the `t+1 → t+2` close-to-close return.
 
@@ -50,14 +53,17 @@ docker compose build
 docker compose run --rm research python -m us_equities_signal_research.cli --rank-ltes 500,1000,2000
 ```
 
-The result cache is written to the fast local `CACHE_ROOT`, not T7:
+The persistent cache is a normal, visible directory under the shared data layer:
 
 ```text
-/cache/backtests/
-  top500_2000_2025/
-  top1000_2000_2025/
-  top2000_2000_2025/
+US_Equities_DataHandler/data/cache/
+  crsp/                         # generic CRSP date × permno panels
+  signal-laboratory/
+    raw/                        # 11 PIT raw signal panels, versioned
+    scores/                     # cached zscore/rank/quintile weight panels
 ```
+
+The research container bind-mounts this directory at `/cache`; it does not use a Docker named volume for research data.
 
 Open Jupyter Lab with `docker compose up -d`, then use
 [`notebooks/01_pit_backtest_report.ipynb`](notebooks/01_pit_backtest_report.ipynb)
